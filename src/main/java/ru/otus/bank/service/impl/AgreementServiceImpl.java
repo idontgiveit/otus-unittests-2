@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public class AgreementServiceImpl implements AgreementService {
 
-    private AgreementDao agreementDao;
+    private final AgreementDao agreementDao;
 
     public AgreementServiceImpl(AgreementDao agreementDao) {
         this.agreementDao = agreementDao;

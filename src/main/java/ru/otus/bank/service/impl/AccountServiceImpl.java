@@ -12,7 +12,7 @@ import java.util.List;
 
 public class AccountServiceImpl implements AccountService {
 
-    private AccountDao accountDao;
+    private final AccountDao accountDao;
 
     public AccountServiceImpl(AccountDao accountDao) {
         this.accountDao = accountDao;
@@ -20,12 +20,12 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account addAccount(Agreement agreement, String accountNumber, Integer type, BigDecimal amount) {
-        Account account = new Account();
-        account.setAgreementId(agreement.getId());
-        account.setNumber(accountNumber);
-        account.setType(type);
-        account.setAmount(amount);
-
+        var account = Account.builder()
+                .agreementId(agreement.getId())
+                .number(accountNumber)
+                .type(type)
+                .amount(amount)
+                .build();
         return accountDao.save(account);
     }
 
@@ -75,5 +75,4 @@ public class AccountServiceImpl implements AccountService {
 
         return true;
     }
-
 }
