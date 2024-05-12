@@ -10,6 +10,8 @@ import ru.otus.bank.entity.Agreement;
 
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
+
 public class AgreementServiceImplTest {
 
     private AgreementDao dao = Mockito.mock(AgreementDao.class);
@@ -56,4 +58,17 @@ public class AgreementServiceImplTest {
         Assertions.assertEquals(10, agreement.getId());
     }
 
+    @Test
+    public void testAddAgreement(){
+        String name = "test agreement";
+        Agreement agreement = new Agreement();
+        agreement.setName(name);
+
+        ArgumentCaptor<Agreement> captor = ArgumentCaptor.forClass(Agreement.class);
+
+        Mockito.when(dao.save(captor.capture())).thenReturn(agreement);
+
+        var result = agreementServiceImpl.addAgreement(name);
+        Assertions.assertEquals(name, result.getName());
+    }
 }
