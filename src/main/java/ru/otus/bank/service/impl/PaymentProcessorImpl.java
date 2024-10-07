@@ -7,6 +7,7 @@ import ru.otus.bank.service.PaymentProcessor;
 import ru.otus.bank.service.exception.AccountException;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 
 public class PaymentProcessorImpl implements PaymentProcessor {
     private AccountService accountService;
@@ -47,7 +48,7 @@ public class PaymentProcessorImpl implements PaymentProcessor {
                 .findAny()
                 .orElseThrow(() -> new AccountException("Account not found"));
 
-        accountService.charge(sourceAccount.getId(), amount.negate().multiply(comissionPercent));
+        accountService.charge(sourceAccount.getId(), amount.multiply(comissionPercent).round(new MathContext(2)));
 
         return accountService.makeTransfer(sourceAccount.getId(), destinationAccount.getId(), amount);
     }

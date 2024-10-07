@@ -12,6 +12,7 @@ import ru.otus.bank.entity.Account;
 import ru.otus.bank.service.exception.AccountException;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -82,5 +83,19 @@ public class AccountServiceImplTest {
 
         verify(accountDao).save(argThat(sourceMatcher));
         verify(accountDao).save(argThat(destinationMatcher));
-        }
+    }
+
+    @Test
+    public void testCharge() {
+        Account account = new Account();
+        account.setAmount(new BigDecimal(200));
+        account.setId(1L);
+
+        when(accountDao.findById(eq(1L))).thenReturn(Optional.of(account));
+
+        AccountServiceImpl accountService = new AccountServiceImpl(accountDao);
+        accountService.charge(1L, new BigDecimal(50));
+
+        assertEquals(new BigDecimal(150), account.getAmount());
+    }
 }
