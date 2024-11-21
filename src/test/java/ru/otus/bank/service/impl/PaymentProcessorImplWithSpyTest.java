@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
@@ -25,7 +24,7 @@ import static org.mockito.Mockito.*;
 @MockitoSettings(strictness = Strictness.STRICT_STUBS)
 public class PaymentProcessorImplWithSpyTest {
 
-    @Mock
+    @Spy
     AccountDao accountDao;
 
     @Spy
@@ -42,11 +41,8 @@ public class PaymentProcessorImplWithSpyTest {
 
     @Test
     public void testTransfer() {
-        Agreement sourceAgreement = new Agreement();
-        sourceAgreement.setId(1L);
-
-        Agreement destinationAgreement = new Agreement();
-        destinationAgreement.setId(2L);
+        Agreement sourceAgreement = new Agreement(1L);
+        Agreement destinationAgreement = new Agreement(2L);
 
         Account sourceAccount = new Account();
         sourceAccount.setAmount(BigDecimal.TEN);
@@ -84,4 +80,33 @@ public class PaymentProcessorImplWithSpyTest {
 
     }
 
+    @Test
+    public void testTransferWithComission() {
+        Agreement sourceAgreement = new Agreement(1L);
+
+        Agreement destinationAgreement = new Agreement(2L);
+
+        Account sourceAccount = new Account();
+        sourceAccount.setId(1L);
+        sourceAccount.setAmount(new BigDecimal(1000000));
+        sourceAccount.setType(0);
+
+        Account destinationAccount = new Account();
+        destinationAccount.setId(2L);
+        destinationAccount.setAmount(BigDecimal.ZERO);
+        destinationAccount.setType(0);
+
+        doReturn(List.of(sourceAccount)).when(accountService).getAccounts(argThat(argument -> argument != null && argument.getId() == 1L));
+
+        doReturn(List.of(destinationAccount)).when(accountService).getAccounts(argThat(argument -> argument != null && argument.getId() == 2L));
+
+        when(accountDao.findById(eq(1L))).thenReturn(Optional.of(sourceAccount));
+        when(accountDao.findById(eq(2L))).thenReturn(Optional.of(destinationAccount));
+
+        paymentProcessor.makeTransferWithComission(sourceAgreement, destinationAgreement,
+                0, 0, new BigDecimal(22), new BigDecimal("0.1"));
+
+        Account account = accountService.getAccounts(sourceAgreement).get(0);
+        assertEquals(new BigDecimal("999980.2"), account.getAmount());
+    }
 }

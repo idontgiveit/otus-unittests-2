@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.otus.bank.dao.AccountDao;
 import ru.otus.bank.entity.Account;
+import ru.otus.bank.entity.Agreement;
 import ru.otus.bank.service.exception.AccountException;
 
 import java.math.BigDecimal;
@@ -27,6 +28,20 @@ public class AccountServiceImplTest {
 
     @InjectMocks
     AccountServiceImpl accountServiceImpl;
+
+    @Test
+    public void testAddAccount() {
+        Agreement agreement = new Agreement();
+        agreement.setId(1L);
+        agreement.setName("testName");
+
+        accountServiceImpl.addAccount(agreement, "1", 1, new BigDecimal(100));
+        ArgumentMatcher<Account> argumentMatcher =
+                account -> account != null && account.getAgreementId() == 1L
+                        && account.getAmount().equals(new BigDecimal(100))
+                        && "1".equals(account.getNumber()) && account.getType().equals(1);
+        verify(accountDao).save(argThat(argumentMatcher));
+    }
 
     @Test
     public void testTransfer() {
@@ -82,5 +97,5 @@ public class AccountServiceImplTest {
 
         verify(accountDao).save(argThat(sourceMatcher));
         verify(accountDao).save(argThat(destinationMatcher));
-        }
+    }
 }
